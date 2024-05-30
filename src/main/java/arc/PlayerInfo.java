@@ -2,13 +2,13 @@ package arc;
 
 import java.net.Socket;
 
-public class Player {
+public class PlayerInfo {
     private Socket playerSocket;
     private int id;
     private String name;
     private ClientCommThread thread;
 
-    public Player(Socket playerSocket, int id, String name, ClientCommThread thread) {
+    public PlayerInfo(Socket playerSocket, int id, String name, ClientCommThread thread) {
         this.playerSocket = playerSocket;
         this.id = id;
         this.name = name;

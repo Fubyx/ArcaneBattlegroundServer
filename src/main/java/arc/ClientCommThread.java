@@ -17,21 +17,25 @@ public class ClientCommThread extends Thread{
         ObjectInputStream oIn = null;
         ObjectOutputStream oOut = null;
         try {
-            oIn = new ObjectInputStream(client.getInputStream());
             oOut = new ObjectOutputStream(client.getOutputStream());
+            oOut.flush();
+            oIn = new ObjectInputStream(client.getInputStream());
             //Send id to client
             int clientId = Server.incClientId();
-            oOut.write(clientId);
+            oOut.writeInt(clientId);
+            oOut.flush();
+            System.out.println("Client ID sent");
             Game game;
             //Read create or join (create = -1; join = gameId)
             int msg = oIn.readInt();
+            System.out.println(msg);
             if(msg == -1){
-                game = new Game(Server.incGameId(), new Player(client, clientId, "", this));
+                game = new Game(Server.incGameId(), new PlayerInfo(client, clientId, "", this));
                 Server.games.add(game);
 
                 //Send gameId to client
-                oOut.write(game.getGameId());
-
+                oOut.writeInt(game.getGameId());
+                oOut.flush();
                 msg = oIn.read();//client sends start or close game TODO: implement close game
                 if(msg == 1){
                     game.start();
@@ -39,14 +43,14 @@ public class ClientCommThread extends Thread{
                     return;
                 }
             }else{
-                boolean res = Server.games.get(Server.games.indexOf(new Game(msg, null))).addPlayer(new Player(client, clientId, "", this));
-                oOut.writeBoolean(res);
+                boolean res = Server.games.get(Server.games.indexOf(new Game(msg, null))).addPlayer(new PlayerInfo(client, clientId, "", this));
+                oOut.writeBoolean(res);oOut.flush();
                 game = Server.games.get(Server.games.indexOf(new Game(msg, null)));
             }
             new GameLoopThread(game, client, clientId).start();
             while(!this.isInterrupted()){//Gameloop
                 game.wait();
-                oOut.writeObject(game.getTapToPublish());
+                oOut.writeObject(game.getTapToPublish());oOut.flush();
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);

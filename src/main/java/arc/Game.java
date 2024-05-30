@@ -2,16 +2,15 @@ package arc;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.util.ArrayList;
 
 public class Game {
     private int gameId;
     private ArrayList<Entity> gameEntities;
-    private ArrayList<Player> players;
+    private ArrayList<PlayerInfo> players;
     private boolean started = false;
     private Entity tapToPublish = null;
-    public Game(int gameId, Player host){
+    public Game(int gameId, PlayerInfo host){
         this.gameId = gameId;
         players = new ArrayList<>();
         players.add(host);
@@ -22,10 +21,10 @@ public class Game {
         return gameId;
     }
 
-    public boolean addPlayer(Player player) throws IOException {
+    public boolean addPlayer(PlayerInfo player) throws IOException {
         if(started || players.size() > 6)
             return false;
-        for (Player p:players) {
+        for (PlayerInfo p:players) {
 
             ObjectOutputStream o = new ObjectOutputStream(p.getPlayerSocket().getOutputStream());
             o.writeChars("Joined: " + player.getName());
@@ -141,13 +140,13 @@ public class Game {
             }
         }
 
-        for (Player p:players) {
+        for (PlayerInfo p:players) {
             ObjectOutputStream o = new ObjectOutputStream(p.getPlayerSocket().getOutputStream());
             o.writeObject(this);
         }
     }
     public void removePlayer(int id) throws IOException {
-        for (Player p:players) {
+        for (PlayerInfo p:players) {
             if(p.getId() == id){
                 players.remove(p);
                 p.getThread().interrupt();
@@ -158,7 +157,7 @@ public class Game {
     }
     public void endGame(int id) throws IOException {
         if(players.get(0).getId() == id){
-            for (Player p:players) {
+            for (PlayerInfo p:players) {
                 p.getThread().interrupt();
                 p.getPlayerSocket().close();
             }
