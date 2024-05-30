@@ -23,7 +23,7 @@ public class Game {
     }
 
     public boolean addPlayer(Player player) throws IOException {
-        if(started)
+        if(started || players.size() > 6)
             return false;
         for (Player p:players) {
 
