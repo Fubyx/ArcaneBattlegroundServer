@@ -16,9 +16,10 @@ public class Server {
     public static synchronized int incGameId(){
         return currentGameId++;
     }
+
     public static void main(String[] args) throws IOException {
         ServerSocket serverSocket = new ServerSocket(50000);
-
+        System.out.println("server started");
         while (true) {
 
             Socket client = serverSocket.accept();
