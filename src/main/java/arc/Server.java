@@ -1,5 +1,7 @@
 package arc;
 
+import shared.Game;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;

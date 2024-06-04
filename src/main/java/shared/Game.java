@@ -1,10 +1,12 @@
-package arc;
+package shared;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Game {
+public class Game implements Serializable {
+
+    private static final long serialVersionUID = 1567L;
     private int gameId;
     private ArrayList<Entity> gameEntities;
     private ArrayList<PlayerInfo> players;
@@ -25,14 +27,14 @@ public class Game {
         if(started || players.size() > 6)
             return false;
         for (PlayerInfo p:players) {
-
-            ObjectOutputStream o = new ObjectOutputStream(p.getPlayerSocket().getOutputStream());
-            o.writeChars("Joined: " + player.getName());
+            p.oOut.writeObject(new String("Joined: " + player.getName()));
             /*
             if (p.getName().equals(player.getName())){
                 player.setName(player.getName() + "_");
             }//*/
         }
+
+        System.out.println("Player joined");
         players.add(player);
         return true;
     }
@@ -141,9 +143,10 @@ public class Game {
         }
 
         for (PlayerInfo p:players) {
-            ObjectOutputStream o = new ObjectOutputStream(p.getPlayerSocket().getOutputStream());
-            o.writeObject(this);
+            p.oOut.writeObject(this);
         }
+
+        System.out.println("Sent game to clients");
     }
     public void removePlayer(int id) throws IOException {
         for (PlayerInfo p:players) {
@@ -173,7 +176,9 @@ public class Game {
 
     public void publish(Entity tap) throws IOException {
         tapToPublish = tap;
-        this.notifyAll();
+        synchronized (this){
+            this.notifyAll();
+        }
         /*
         for (Player p:players) {
             if(p.getId() != playerToExclude){
@@ -191,5 +196,12 @@ public class Game {
     @Override
     public boolean equals(Object obj) {
         return ((Game)obj).gameId == this.gameId;
+    }
+    public ArrayList<Entity> getGameEntities() {
+        return gameEntities;
+    }
+
+    public ArrayList<PlayerInfo> getPlayers() {
+        return players;
     }
 }
